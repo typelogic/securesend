@@ -15,7 +15,7 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 
 import QRCode from 'react-native-qrcode-svg';
-import {MD5,getRandomString,isQRValid} from './Helper';
+import {MD5,getRandomString,isQRValid,getRandomSentence} from './Helper';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import { RNCamera } from 'react-native-camera';
 import BluetoothApi from "react-native-bluetooth-secure";
@@ -54,21 +54,81 @@ class App extends React.Component {
     this.SetConnectionParameters = this.SetConnectionParameters.bind(this)
     this.Disconnect = this.Disconnect.bind(this)
     this.onScan = this.onScan.bind(this)
+    this.Send = this.Send.bind(this)
     
-    var params = {
-      cid: getRandomString(5),
-      pk: getRandomString(32)
-    }
-
     this.state = {
       page: 0,
-      params: "hello"
+      msg: "",
+      checksum: "",
+      params: "hello",
+      color: 'gray',
+      logmsg: "",
+      qrButtonDisabled: false,
+      scanButtonDisabled: false,
+      disconButtonDisabled: true,
+      sendButtonDisabled: true
     }
+
   } 
+
+  componentDidMount() {
+    this.nearbyEvents = BluetoothApi.handleNearbyEvents((event) => {
+        console.log(event.type)
+        switch (event.type) {
+        case "msg":
+        this.setState({
+          msg: event.data,
+          checksum: MD5(event.data)
+        });
+        break;
+
+        case "onDisconnected":
+        console.log("onDisconnected:" + event.data)
+        this.setState({
+          checksum: "",
+          msg: "",
+          params: "hello",
+          qrButtonDisabled: false,
+          scanButtonDisabled: false,
+          disconButtonDisabled: true,
+          sendButtonDisabled: true
+        });
+        break;
+
+        case "transferupdate":
+        console.log("transferupdate:" + event.data)
+        break;
+
+        default:
+        break;
+      }
+
+    })
+    
+    this.LogEvents = BluetoothApi.handleLogEvents((event) => {
+      var logmsg = (this.state.logmsg ? this.state.logmsg : "") + "\n" + event.log
+      this.setState({
+        logmsg: logmsg
+      })
+    })
+  }
+
+  componentWillUnmount() {
+    if (this.NearbyEvents) {
+      this.nearbyEvents.remove();
+    }
+
+    if (this.LogEvents) {
+      this.LogEvents.remove();
+    }
+  }
 
   GetConnectionParameters() {
     var params = JSON.parse(BluetoothApi.getConnectionParameters())
     this.setState({
+      qrButtonDisabled: true,
+      scanButtonDisabled: true,
+      color: 'black',
       params: {
         cid: params.cid,
         pk: params.pk
@@ -78,14 +138,20 @@ class App extends React.Component {
     BluetoothApi.createConnection("dual", () => {
       console.log("-- connected ---")
       this.setState({
-        page: 0
+        page: 0,
+        params: "hello",
+        color: 'gray',
+        disconButtonDisabled: false,
+        sendButtonDisabled: false
       })
     })
   }
 
   SetConnectionParameters() {
     this.setState({
-      page: 1
+      page: 1,
+      qrButtonDisabled: true,
+      scanButtonDisabled: true
     })
   }
 
@@ -98,6 +164,13 @@ class App extends React.Component {
     BluetoothApi.setConnectionParameters(qr.data)
     BluetoothApi.createConnection("dual", () => {
       console.log("-- connected ---")
+      this.setState({
+        page: 0,
+        params: "hello",
+        color: 'gray',
+        disconButtonDisabled: false,
+        sendButtonDisabled: false
+      })
     })
 
     this.setState({
@@ -108,6 +181,30 @@ class App extends React.Component {
   Disconnect() {
     console.log("*** Disconnect ***");
     BluetoothApi.destroyConnection()
+
+    this.setState({
+      qrButtonDisabled: false,
+      scanButtonDisabled: false,
+      disconButtonDisabled: true,
+      sendButtonDisabled: true
+    })
+  }
+
+  Send() {
+    let msg = getRandomSentence(42);
+
+    this.setState({
+      msg: "",
+      checksum: ""
+    });
+
+    BluetoothApi.send(msg, () => {
+      console.log("*** sent ***")
+      this.setState({
+        checksum: MD5(msg),
+        msg: msg
+      })
+    })
   }
 
   render() {
@@ -118,22 +215,25 @@ class App extends React.Component {
           <ScrollView>
             <View>
               <Section title="securesend 0.0.1">
-              <Button title="QR" onPress={this.GetConnectionParameters} />
+              <Button title="QR" disabled={this.state.qrButtonDisabled} onPress={this.GetConnectionParameters} />
               <View style={styles.space} />
-              <Button title="Scan" onPress={this.SetConnectionParameters} />
+              <Button title="Scan" disabled={this.state.scanButtonDisabled} onPress={this.SetConnectionParameters} />
               <View style={styles.space} />
-              <Button title="Discon"  onPress={this.Disconnect} />
+              <Button title="Discon" disabled={this.state.disconButtonDisabled} onPress={this.Disconnect} />
               <View style={styles.space} />
-              <Button title="Send" />
+              <Button title="Send" disabled={this.state.sendButtonDisabled} onPress={this.Send} />
               </Section>
               <Section title="connection code">
-              <QRCode value={JSON.stringify(this.state.params)} />
+              <QRCode size={200} color={this.state.color} value={JSON.stringify(this.state.params)} />
               </Section>
               <Section title="checksum">
+                <Text>{this.state.checksum}</Text>
               </Section>
               <Section title="message">
+                <Text>{this.state.msg}</Text>
               </Section>
               <Section title="log">
+                <Text>{this.state.logmsg}</Text>
               </Section>
             </View>
           </ScrollView>
