@@ -22,9 +22,12 @@ npx react-native link react-native-permissions
 # finally, install the Bluetooth library
 npm install --save react-native-bluetooth-secure
 
-vi android/app/build.gradle
 # Add 
 # missingDimensionStrategy 'react-native-camera', 'general'
+vi android/app/build.gradle
+
+# Declare needed Android permissions
+vi android/app/src/main/AndroidManifest.xml
 ```
 
 Open the **android** project in **Android Studio** and build the test app . If encountering errors, do `invalidate cache and restart`.
