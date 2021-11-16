@@ -1,17 +1,8 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
 import React from 'react';
 import type {Node} from 'react';
 import {
   SafeAreaView,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   useColorScheme,
@@ -22,6 +13,9 @@ import {
 import {
   Colors,
 } from 'react-native/Libraries/NewAppScreen';
+
+import QRCode from 'react-native-qrcode-svg';
+import {MD5,getRandomString} from './Helper';
 
 const Section = ({children, title}): Node => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -49,36 +43,65 @@ const Section = ({children, title}): Node => {
   );
 };
 
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+class App extends React.Component {
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  constructor(props) {
+    super(props)
+    this.GetConnectionParameters = this.GetConnectionParameters.bind(this)
+    
+    var params = {
+      cid: getRandomString(5),
+      pk: getRandomString(32)
+    }
+    this.state = {
+      params: {
+        cid: params.cid,
+        pk: params.pk
+      }
+    }
+  } 
 
-  return (
-    <SafeAreaView>
-      <ScrollView>
-        <View>
-          <Section title="SecureSend 0.0.1">
-          <Button title="QR" />
-          <View style={styles.space} />
-          <Button title="Scan" />
-          <View style={styles.space} />
-          <Button title="Discon" />
-          <View style={styles.space} />
-          <Button title="Send" />
-          </Section>
-          <Section title="checksum">
-          </Section>
-          <Section title="message">
-          </Section>
-          <Section title="log">
-          </Section>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+  GetConnectionParameters() {
+    var params = {
+      cid: getRandomString(5),
+      pk: getRandomString(32)
+    }
+    this.setState({
+      params: {
+        cid: params.cid,
+        pk: params.pk
+      }
+    })
+  }
+
+  render() {
+    return (
+      <SafeAreaView>
+        <ScrollView>
+          <View>
+            <Section title="securesend 0.0.1">
+            <Button title="QR" onPress={this.GetConnectionParameters} />
+            <View style={styles.space} />
+            <Button title="Scan" />
+            <View style={styles.space} />
+            <Button title="Discon" />
+            <View style={styles.space} />
+            <Button title="Send" />
+            </Section>
+            <Section title="connection code">
+            <QRCode value={JSON.stringify(this.state.params)} />
+            </Section>
+            <Section title="checksum">
+            </Section>
+            <Section title="message">
+            </Section>
+            <Section title="log">
+            </Section>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
 };
 
 const styles = StyleSheet.create({
@@ -101,6 +124,13 @@ const styles = StyleSheet.create({
   space: {
     width: 20,
     height: 20
+  },
+  centerplace: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%',
+    backgroundColor: '#FFFFFF'
   }
 });
 
