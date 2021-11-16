@@ -158,6 +158,12 @@ class App extends React.Component {
   onScan(qr) {
     if (!isQRValid(qr)) {
       console.log("QR code is invalid");
+      this.setState({
+        page: 0,
+        msg: "INVALID QR CODE",
+        qrButtonDisabled: false,
+        scanButtonDisabled: false
+      })
       return
     } 
 
