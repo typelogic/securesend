@@ -18,9 +18,10 @@ import QRCode from 'react-native-qrcode-svg';
 import {MD5,getRandomString,isQRValid} from './Helper';
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import { RNCamera } from 'react-native-camera';
+import BluetoothApi from "react-native-bluetooth-secure";
 
 const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
+  const isDarkMode = false;
   return (
     <View style={styles.sectionContainer}>
       <Text
@@ -51,31 +52,34 @@ class App extends React.Component {
     super(props)
     this.GetConnectionParameters = this.GetConnectionParameters.bind(this)
     this.SetConnectionParameters = this.SetConnectionParameters.bind(this)
+    this.Disconnect = this.Disconnect.bind(this)
     this.onScan = this.onScan.bind(this)
     
     var params = {
       cid: getRandomString(5),
       pk: getRandomString(32)
     }
+
     this.state = {
       page: 0,
-      params: {
-        cid: params.cid,
-        pk: params.pk
-      }
+      params: "hello"
     }
   } 
 
   GetConnectionParameters() {
-    var params = {
-      cid: getRandomString(5),
-      pk: getRandomString(32)
-    }
+    var params = JSON.parse(BluetoothApi.getConnectionParameters())
     this.setState({
       params: {
         cid: params.cid,
         pk: params.pk
       }
+    })
+
+    BluetoothApi.createConnection("dual", () => {
+      console.log("-- connected ---")
+      this.setState({
+        page: 0
+      })
     })
   }
 
@@ -86,22 +90,31 @@ class App extends React.Component {
   }
 
   onScan(qr) {
-    if (isQRValid(qr)) {
-      console.log("QR code is valid");
-    } else {
+    if (!isQRValid(qr)) {
       console.log("QR code is invalid");
-    }
-    console.log(qr.data)
+      return
+    } 
+
+    BluetoothApi.setConnectionParameters(qr.data)
+    BluetoothApi.createConnection("dual", () => {
+      console.log("-- connected ---")
+    })
+
     this.setState({
       page: 0
     })
+  }
+
+  Disconnect() {
+    console.log("*** Disconnect ***");
+    BluetoothApi.destroyConnection()
   }
 
   render() {
     switch (this.state.page) {
       case 0:
       return (
-        <SafeAreaView>
+        <SafeAreaView style={{backgroundColor: Colors.white}} >
           <ScrollView>
             <View>
               <Section title="securesend 0.0.1">
@@ -109,7 +122,7 @@ class App extends React.Component {
               <View style={styles.space} />
               <Button title="Scan" onPress={this.SetConnectionParameters} />
               <View style={styles.space} />
-              <Button title="Discon" />
+              <Button title="Discon"  onPress={this.Disconnect} />
               <View style={styles.space} />
               <Button title="Send" />
               </Section>
@@ -163,6 +176,9 @@ const styles = StyleSheet.create({
   space: {
     width: 20,
     height: 20
+  },
+  whitebg: {
+    backgroundColor: '#FFFFFF'
   },
   centerplace: {
     flexDirection: 'column',
