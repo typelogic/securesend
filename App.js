@@ -16,14 +16,11 @@ import {
   Text,
   useColorScheme,
   View,
+  Button
 } from 'react-native';
 
 import {
   Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
 const Section = ({children, title}): Node => {
@@ -60,30 +57,24 @@ const App: () => Node = () => {
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
+    <SafeAreaView>
+      <ScrollView>
+        <View>
+          <Section title="SecureSend 0.0.1">
+          <Button title="QR" />
+          <View style={styles.space} />
+          <Button title="Scan" />
+          <View style={styles.space} />
+          <Button title="Discon" />
+          <View style={styles.space} />
+          <Button title="Send" />
           </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
+          <Section title="checksum">
           </Section>
-          <Section title="Debug">
-            <DebugInstructions />
+          <Section title="message">
           </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
+          <Section title="log">
           </Section>
-          <LearnMoreLinks />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -107,6 +98,10 @@ const styles = StyleSheet.create({
   highlight: {
     fontWeight: '700',
   },
+  space: {
+    width: 20,
+    height: 20
+  }
 });
 
 export default App;
