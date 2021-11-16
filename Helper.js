@@ -10,3 +10,19 @@ export function getRandomString(length) {
   }
   return result;
 }
+
+export function isQRValid(qr) {
+  try {
+    var qrcode = JSON.parse(qr.data)
+    if ("cid" in qrcode && "pk" in qrcode) {
+      if (typeof qrcode.cid == 'string' && typeof qrcode.pk == 'string') {
+        if (qrcode.cid.length > 0 && qrcode.pk.length > 0) {
+          return true
+        }
+      }
+    }
+  } catch (err) {
+    console.log("error: QR content not json")
+  }
+  return false
+}

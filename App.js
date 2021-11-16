@@ -15,7 +15,9 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 
 import QRCode from 'react-native-qrcode-svg';
-import {MD5,getRandomString} from './Helper';
+import {MD5,getRandomString,isQRValid} from './Helper';
+import QRCodeScanner from 'react-native-qrcode-scanner';
+import { RNCamera } from 'react-native-camera';
 
 const Section = ({children, title}): Node => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -48,12 +50,15 @@ class App extends React.Component {
   constructor(props) {
     super(props)
     this.GetConnectionParameters = this.GetConnectionParameters.bind(this)
+    this.SetConnectionParameters = this.SetConnectionParameters.bind(this)
+    this.onScan = this.onScan.bind(this)
     
     var params = {
       cid: getRandomString(5),
       pk: getRandomString(32)
     }
     this.state = {
+      page: 0,
       params: {
         cid: params.cid,
         pk: params.pk
@@ -74,34 +79,68 @@ class App extends React.Component {
     })
   }
 
-  render() {
-    return (
-      <SafeAreaView>
-        <ScrollView>
-          <View>
-            <Section title="securesend 0.0.1">
-            <Button title="QR" onPress={this.GetConnectionParameters} />
-            <View style={styles.space} />
-            <Button title="Scan" />
-            <View style={styles.space} />
-            <Button title="Discon" />
-            <View style={styles.space} />
-            <Button title="Send" />
-            </Section>
-            <Section title="connection code">
-            <QRCode value={JSON.stringify(this.state.params)} />
-            </Section>
-            <Section title="checksum">
-            </Section>
-            <Section title="message">
-            </Section>
-            <Section title="log">
-            </Section>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    );
+  SetConnectionParameters() {
+    this.setState({
+      page: 1
+    })
   }
+
+  onScan(qr) {
+    if (isQRValid(qr)) {
+      console.log("QR code is valid");
+    } else {
+      console.log("QR code is invalid");
+    }
+    console.log(qr.data)
+    this.setState({
+      page: 0
+    })
+  }
+
+  render() {
+    switch (this.state.page) {
+      case 0:
+      return (
+        <SafeAreaView>
+          <ScrollView>
+            <View>
+              <Section title="securesend 0.0.1">
+              <Button title="QR" onPress={this.GetConnectionParameters} />
+              <View style={styles.space} />
+              <Button title="Scan" onPress={this.SetConnectionParameters} />
+              <View style={styles.space} />
+              <Button title="Discon" />
+              <View style={styles.space} />
+              <Button title="Send" />
+              </Section>
+              <Section title="connection code">
+              <QRCode value={JSON.stringify(this.state.params)} />
+              </Section>
+              <Section title="checksum">
+              </Section>
+              <Section title="message">
+              </Section>
+              <Section title="log">
+              </Section>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      );
+      break;
+
+      case 1:
+      return(
+      <QRCodeScanner
+        onRead={this.onScan}
+        bottomContent={
+          <Text style={{fontWeight: "bold"}}>Scan the receiver QR code</Text>
+        }
+      />
+      );
+      break;
+
+    } // switch
+  } // render
 };
 
 const styles = StyleSheet.create({

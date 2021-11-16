@@ -12,6 +12,10 @@ target 'securesend' do
     :hermes_enabled => false
   )
 
+  pod 'RNPermissions', :path => '../node_modules/react-native-permissions'
+
+  pod 'react-native-camera', :path => '../node_modules/react-native-camera'
+
   target 'securesendTests' do
     inherit! :complete
     # Pods for testing
