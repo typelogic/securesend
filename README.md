@@ -4,7 +4,7 @@
 
 When a simple send suddenly becomes serious. This is a test React Native application to test the [react-native-bluetooth-secure](https://github.com/typelogic/react-native-bluetooth-secure) library.
 
-# Steps taken to develop SecureSend test app:
+## Steps taken to develop SecureSend test app:
 ```
 npx react-native init securesend
 cd securesend
