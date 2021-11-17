@@ -128,6 +128,8 @@ class App extends React.Component {
     this.setState({
       qrButtonDisabled: true,
       scanButtonDisabled: true,
+      msg: "",
+      checksum: "",
       color: 'black',
       params: {
         cid: params.cid,
@@ -150,6 +152,8 @@ class App extends React.Component {
   SetConnectionParameters() {
     this.setState({
       page: 1,
+      msg: "",
+      checksum: "",
       qrButtonDisabled: true,
       scanButtonDisabled: true
     })
@@ -160,7 +164,7 @@ class App extends React.Component {
       console.log("QR code is invalid");
       this.setState({
         page: 0,
-        msg: "INVALID QR CODE",
+        msg: "INVALID CONNECTION CODE",
         qrButtonDisabled: false,
         scanButtonDisabled: false
       })
@@ -239,6 +243,7 @@ class App extends React.Component {
                 <Text>{this.state.msg}</Text>
               </Section>
               <Section title="log">
+                <Button title="Clear" onPress={() => {this.setState({logmsg:""})}} />
                 <Text>{this.state.logmsg}</Text>
               </Section>
             </View>
@@ -252,7 +257,7 @@ class App extends React.Component {
       <QRCodeScanner
         onRead={this.onScan}
         bottomContent={
-          <Text style={{fontWeight: "bold"}}>Scan the receiver QR code</Text>
+          <Text style={{fontWeight: "bold"}}>Scan QR Connection Code</Text>
         }
       />
       );
