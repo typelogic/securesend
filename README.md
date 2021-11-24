@@ -30,4 +30,10 @@ vi android/app/build.gradle
 vi android/app/src/main/AndroidManifest.xml
 ```
 
+## Notes
+
+Noting here workarounds that helped me when encountering weird issues:
+
+- `npm start -- --reset-cache` instead of `npx react-native start`
+
 Open the **android** project in **Android Studio** and build the test app . If encountering errors, do `invalidate cache and restart`.
