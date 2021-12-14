@@ -76,8 +76,9 @@ class App extends React.Component {
         console.log(event.type)
         switch (event.type) {
         case "msg":
+        var alphaOmega = event.data.substr(0, 20) + event.data.substr(event.data.length - 20);
         this.setState({
-          msg: event.data,
+          msg: alphaOmega,
           checksum: MD5(event.data)
         });
         break;
@@ -96,7 +97,10 @@ class App extends React.Component {
         break;
 
         case "transferupdate":
-        console.log("transferupdate:" + event.data)
+        this.setState({
+          checksum: event.data,
+          sendButtonDisabled: event.data < 1.0 ? true:false
+        });
         break;
 
         default:
@@ -201,7 +205,8 @@ class App extends React.Component {
   }
 
   Send() {
-    let msg = getRandomSentence(42);
+    let msg = "alpha 9MB payload " + getRandomString(9000000) + " omega";
+    var alphaOmega = msg.substr(0, 20) + msg.substr(msg.length - 20);
 
     this.setState({
       msg: "",
@@ -212,7 +217,7 @@ class App extends React.Component {
       console.log("*** sent ***")
       this.setState({
         checksum: MD5(msg),
-        msg: msg
+        msg: alphaOmega 
       })
     })
   }
@@ -224,7 +229,7 @@ class App extends React.Component {
         <SafeAreaView style={{backgroundColor: Colors.white}} >
           <ScrollView>
             <View>
-              <Section title="securesend 0.0.1">
+              <Section title="securesend 0.0.2">
               <Button title="QR" disabled={this.state.qrButtonDisabled} onPress={this.GetConnectionParameters} />
               <View style={styles.space} />
               <Button title="Scan" disabled={this.state.scanButtonDisabled} onPress={this.SetConnectionParameters} />
